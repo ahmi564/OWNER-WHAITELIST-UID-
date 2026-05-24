@@ -69,7 +69,7 @@ async def send_log(embed):
 # =========================
 @bot.tree.command(
     name="owner",
-    description="VIP Premium Access"
+    description=" Premium Access"
 )
 @app_commands.describe(
     user="Select User",
@@ -91,7 +91,7 @@ async def owner(interaction: discord.Interaction, user: discord.Member, uid: str
 
     embed.add_field(name="🆔 UID", value=f"`{uid}`", inline=True)
     embed.add_field(name="🟢 STATUS", value="ACTIVE", inline=True)
-    embed.add_field(name="👑 ACCESS", value="PREMIUM VIP", inline=True)
+    embed.add_field(name="👑 ACCESS", value="PREMIUM ", inline=True)
 
     embed.add_field(name="👤 USER", value=user.mention, inline=True)
     embed.add_field(name="📅 ACTIVE DAYS", value=f"{days} DAYS", inline=True)
