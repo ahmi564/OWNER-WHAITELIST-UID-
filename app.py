@@ -153,4 +153,5 @@ async def uid_add(interaction: discord.Interaction, uid: str):
     vip_users[uid] = {
         "user": "AXB",
         "days": 1,
-        "exp}
+        "exp
+        }
