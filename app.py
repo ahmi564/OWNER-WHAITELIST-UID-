@@ -127,7 +127,7 @@ async def uid_add(interaction: discord.Interaction, uid: str):
     formatted_expire = expire_date.strftime("%d-%m-%Y %H:%M")
 
     vip_users[uid] = {
-        "user": None,
+        "user": "AXB",
         "days": 1,
         "expire": expire_date
     }
@@ -138,11 +138,15 @@ async def uid_add(interaction: discord.Interaction, uid: str):
         color=0x8a2be2
     )
 
+    # BOT DP
+    embed.set_thumbnail(url=bot.user.display_avatar.url)
+
     embed.add_field(name="🆔 UID", value=f"{uid}", inline=True)
     embed.add_field(name="🟢 STATUS", value="ACTIVE", inline=True)
     embed.add_field(name="👑 ACCESS", value="PREMIUM", inline=True)
 
-    embed.add_field(name="📅 ACTIVE DAYS", value="1 DAY", inline=True)
+    embed.add_field(name="👤 USER", value="AXB", inline=True)
+    embed.add_field(name="📅 ACTIVE DAYS", value="1 DAYS", inline=True)
     embed.add_field(name="⏰ EXPIRES ON", value=formatted_expire, inline=True)
 
     embed.set_footer(text="AXB PREMIUM SECURITY")
@@ -170,11 +174,18 @@ async def status(interaction: discord.Interaction, uid: str):
 
     embed = discord.Embed(
         title="🔍 UID STATUS",
-        color=0x3498db
+        description="UID Status Information",
+        color=0x8a2be2
     )
 
-    embed.add_field(name="🆔 UID", value=uid, inline=True)
+    embed.set_thumbnail(url=bot.user.display_avatar.url)
+
+    embed.add_field(name="🆔 UID", value=f"{uid}", inline=True)
     embed.add_field(name="🟢 STATUS", value="ACTIVE", inline=True)
+    embed.add_field(name="👑 ACCESS", value="PREMIUM", inline=True)
+
+    embed.add_field(name="👤 USER", value="AXB", inline=True)
+    embed.add_field(name="📅 ACTIVE DAYS", value=f"{data['days']} DAYS", inline=True)
     embed.add_field(
         name="⏰ EXPIRES ON",
         value=data["expire"].strftime("%d-%m-%Y %H:%M"),
@@ -186,7 +197,7 @@ async def status(interaction: discord.Interaction, uid: str):
     await interaction.response.send_message(embed=embed)
 
 # =========================
-# OWNER REMOVE COMMAND
+# REMOVE COMMAND
 # =========================
 @bot.tree.command(
     name="owner_remove",
@@ -200,7 +211,7 @@ async def owner_remove(interaction: discord.Interaction, uid: str):
 
     embed = discord.Embed(
         title="❌ VIP ACCESS REMOVED",
-        description=f"VIP Access for UID {uid} has been removed.",
+        description=f"VIP Access for UID `{uid}` has been removed.",
         color=0xFF0000
     )
 
