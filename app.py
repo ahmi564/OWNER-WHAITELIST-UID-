@@ -154,4 +154,3 @@ async def uid_add(interaction: discord.Interaction, uid: str):
         "user": "AXB",
         "days": 1,
         "exp
-        }
