@@ -13,7 +13,10 @@ load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 LOG_CHANNEL_ID = os.getenv("LOG_CHANNEL_ID")
 
-LOG_CHANNEL_ID = int(LOG_CHANNEL_ID) if LOG_CHANNEL_ID else None
+if LOG_CHANNEL_ID:
+    LOG_CHANNEL_ID = int(LOG_CHANNEL_ID)
+else:
+    LOG_CHANNEL_ID = None
 
 # =========================
 # TEMP DATABASE
@@ -47,10 +50,10 @@ async def on_ready():
         synced = await bot.tree.sync()
         print(f"✅ Synced {len(synced)} Commands")
     except Exception as e:
-        print(f"Sync Error: {e}")
+        print(e)
 
 # =========================
-# LOG FUNCTION
+# SAFE LOG FUNCTION
 # =========================
 async def send_log(embed):
     if not LOG_CHANNEL_ID:
@@ -61,29 +64,27 @@ async def send_log(embed):
     if channel:
         try:
             await channel.send(embed=embed)
+        except discord.Forbidden:
+            print("❌ Bot has no permission to send messages in log channel")
         except Exception as e:
-            print(f"Log Error: {e}")
+            print(f"❌ Log error: {e}")
 
 # =========================
 # OWNER COMMAND
 # =========================
 @bot.tree.command(
     name="owner",
-    description="Give Premium Access"
+    description="Premium Access"
 )
 @app_commands.describe(
     user="Select User",
     uid="Enter UID",
-    days="Active Days"
+    days="Enter Active Days"
 )
-async def owner(
-    interaction: discord.Interaction,
-    user: discord.Member,
-    uid: str,
-    days: int
-):
+async def owner(interaction: discord.Interaction, user: discord.Member, uid: str, days: int):
 
     expire_date = datetime.now() + timedelta(days=days)
+    formatted_expire = expire_date.strftime("%d-%m-%Y %H:%M")
 
     vip_users[uid] = {
         "user": user.id,
@@ -93,19 +94,19 @@ async def owner(
 
     embed = discord.Embed(
         title="💎 VIP ACCESS ACTIVATED",
+        description="A new premium user has been activated successfully.",
         color=0x8a2be2
     )
 
     embed.set_thumbnail(url=user.display_avatar.url)
 
-    embed.add_field(name="🆔 UID", value=f"`{uid}`", inline=False)
-    embed.add_field(name="👤 USER", value=user.mention, inline=False)
-    embed.add_field(name="📅 DAYS", value=str(days), inline=False)
-    embed.add_field(
-        name="⏰ EXPIRES",
-        value=expire_date.strftime("%d-%m-%Y %H:%M"),
-        inline=False
-    )
+    embed.add_field(name="🆔 UID", value=f"{uid}", inline=True)
+    embed.add_field(name="🟢 STATUS", value="ACTIVE", inline=True)
+    embed.add_field(name="👑 ACCESS", value="PREMIUM", inline=True)
+
+    embed.add_field(name="👤 USER", value=user.mention, inline=True)
+    embed.add_field(name="📅 ACTIVE DAYS", value=f"{days} DAYS", inline=True)
+    embed.add_field(name="⏰ EXPIRES ON", value=formatted_expire, inline=True)
 
     embed.set_footer(text="AXB PREMIUM SECURITY")
 
@@ -120,12 +121,10 @@ async def owner(
     description="Add UID For 1 Day"
 )
 @app_commands.describe(uid="Enter UID")
-async def uid_add(
-    interaction: discord.Interaction,
-    uid: str
-):
+async def uid_add(interaction: discord.Interaction, uid: str):
 
     expire_date = datetime.now() + timedelta(days=1)
+    formatted_expire = expire_date.strftime("%d-%m-%Y %H:%M")
 
     vip_users[uid] = {
         "user": None,
@@ -134,13 +133,17 @@ async def uid_add(
     }
 
     embed = discord.Embed(
-        title="✅ UID ADDED",
-        color=0x00ff00
+        title="💎 VIP ACCESS ACTIVATED",
+        description="A new premium user has been activated successfully.",
+        color=0x8a2be2
     )
 
-    embed.add_field(name="🆔 UID", value=f"`{uid}`", inline=False)
-    embed.add_field(name="🟢 STATUS", value="ACTIVE", inline=False)
-    embed.add_field(name="📅 DAYS", value="1 DAY", inline=False)
+    embed.add_field(name="🆔 UID", value=f"{uid}", inline=True)
+    embed.add_field(name="🟢 STATUS", value="ACTIVE", inline=True)
+    embed.add_field(name="👑 ACCESS", value="PREMIUM", inline=True)
+
+    embed.add_field(name="📅 ACTIVE DAYS", value="1 DAY", inline=True)
+    embed.add_field(name="⏰ EXPIRES ON", value=formatted_expire, inline=True)
 
     embed.set_footer(text="AXB PREMIUM SECURITY")
 
@@ -155,14 +158,11 @@ async def uid_add(
     description="Check UID Status"
 )
 @app_commands.describe(uid="Enter UID")
-async def status(
-    interaction: discord.Interaction,
-    uid: str
-):
+async def status(interaction: discord.Interaction, uid: str):
 
     if uid not in vip_users:
         await interaction.response.send_message(
-            f"❌ UID `{uid}` Not Found"
+            f"❌ UID `{uid}` Not Found."
         )
         return
 
@@ -173,12 +173,12 @@ async def status(
         color=0x3498db
     )
 
-    embed.add_field(name="🆔 UID", value=f"`{uid}`", inline=False)
-    embed.add_field(name="🟢 STATUS", value="ACTIVE", inline=False)
+    embed.add_field(name="🆔 UID", value=uid, inline=True)
+    embed.add_field(name="🟢 STATUS", value="ACTIVE", inline=True)
     embed.add_field(
-        name="⏰ EXPIRES",
+        name="⏰ EXPIRES ON",
         value=data["expire"].strftime("%d-%m-%Y %H:%M"),
-        inline=False
+        inline=True
     )
 
     embed.set_footer(text="AXB PREMIUM SECURITY")
@@ -186,25 +186,22 @@ async def status(
     await interaction.response.send_message(embed=embed)
 
 # =========================
-# REMOVE COMMAND
+# OWNER REMOVE COMMAND
 # =========================
 @bot.tree.command(
     name="owner_remove",
-    description="Remove VIP Access"
+    description="Remove VIP Access from UID"
 )
-@app_commands.describe(uid="Enter UID")
-async def owner_remove(
-    interaction: discord.Interaction,
-    uid: str
-):
+@app_commands.describe(uid="Enter UID to remove")
+async def owner_remove(interaction: discord.Interaction, uid: str):
 
     if uid in vip_users:
         del vip_users[uid]
 
     embed = discord.Embed(
         title="❌ VIP ACCESS REMOVED",
-        description=f"UID `{uid}` Removed Successfully",
-        color=0xff0000
+        description=f"VIP Access for UID {uid} has been removed.",
+        color=0xFF0000
     )
 
     embed.set_footer(text="AXB PREMIUM SECURITY")
